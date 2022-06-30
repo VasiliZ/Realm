@@ -4,7 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.github.rtyvz.realm.model.Book
+import com.github.rtyvz.realm.model.BookDto
+import com.github.rtyvz.realm.model.BookPresentation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -50,20 +51,22 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         coroutineContext.launch {
-            bookAdapter.submitList(retrieveBooks())
+            bookAdapter.submitList(retrieveBooks().map {
+                BookPresentation(it.id, it.title, it.description)
+            })
         }
     }
 
 
-    private suspend fun retrieveBooks(): List<Book> {
+    private suspend fun retrieveBooks(): List<BookDto> {
         val realm = Realm.getInstance(realmConfig)
-        val books = mutableListOf<Book>()
+        val books = mutableListOf<BookDto>()
         realm.executeTransactionAwait(Dispatchers.IO) { transaction ->
             books.addAll(
-                realm.where(Book::class.java)
+                realm.where(BookDto::class.java)
                     .findAll()
                     .map {
-                        Book().apply {
+                        BookDto().apply {
                             title = it.title
                             description = it.description
                         }
@@ -73,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         return books
     }
 
-    private fun editBook(book: Book) {
+    private fun editBook(bookDto: BookDto) {
 
 
         coroutineContext.launch {

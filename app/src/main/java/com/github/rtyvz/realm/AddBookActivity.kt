@@ -3,7 +3,7 @@ package com.github.rtyvz.realm
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.github.rtyvz.realm.model.Book
+import com.github.rtyvz.realm.model.BookDto
 import com.google.android.material.textfield.TextInputEditText
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -35,7 +35,7 @@ class AddBookActivity : AppCompatActivity() {
     private fun addNewBook() {
         coroutineContext.launch {
             Realm.getInstance(realmConfig).executeTransactionAwait(Dispatchers.IO) {
-                it.insert(Book().apply {
+                it.insert(BookDto().apply {
                     title = titleBook.text.toString()
                     description = descriptionBook.text.toString()
                 })

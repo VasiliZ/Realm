@@ -7,11 +7,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.github.rtyvz.realm.model.Book
+import com.github.rtyvz.realm.model.BookDto
+import com.github.rtyvz.realm.model.BookPresentation
 
 class BookAdapter(
-    private val onClickListener: ((Book) -> (Unit))
-) : ListAdapter<Book, BookAdapter.BookViewHolder>(BookDiffer()) {
+    private val onClickListener: ((BookPresentation) -> (Unit))
+) : ListAdapter<BookPresentation, BookAdapter.BookViewHolder>(BookDiffer()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
         return BookViewHolder(
@@ -31,19 +32,19 @@ class BookAdapter(
         private val itemTitle = view.findViewById<TextView>(R.id.itemTitle)
         private val itemDescription = view.findViewById<TextView>(R.id.itemDescription)
 
-        fun bind(book: Book) {
-            itemTitle.text = book.title
-            itemDescription.text = book.description
+        fun bind(bookDto: BookPresentation) {
+            itemTitle.text = bookDto.title
+            itemDescription.text = bookDto.description
         }
     }
 }
 
-class BookDiffer : DiffUtil.ItemCallback<Book>() {
-    override fun areItemsTheSame(oldItem: Book, newItem: Book): Boolean {
+class BookDiffer : DiffUtil.ItemCallback<BookPresentation>() {
+    override fun areItemsTheSame(oldItem: BookPresentation, newItem: BookPresentation): Boolean {
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: Book, newItem: Book): Boolean {
+    override fun areContentsTheSame(oldItem: BookPresentation, newItem: BookPresentation): Boolean {
         return oldItem.equals(newItem)
     }
 }
