@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Realm</string>
+    <string name="add_book">Add book</string>
 </resources>
