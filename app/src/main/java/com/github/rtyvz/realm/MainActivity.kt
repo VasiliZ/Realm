@@ -31,9 +31,9 @@ class MainActivity : AppCompatActivity() {
         bookList = findViewById(R.id.bookList)
 
         bookAdapter = BookAdapter {
-            startActivity(Intent(this, AddBookActivity::class.java)).apply {
-
-            }
+            startActivity(Intent(this, AddBookActivity::class.java).apply {
+                putExtra(EDIT_BOOK_EXTRA, it)
+            })
         }
 
         bookList.adapter = bookAdapter
@@ -74,14 +74,5 @@ class MainActivity : AppCompatActivity() {
             )
         }
         return books
-    }
-
-    private fun editBook(bookDto: BookDto) {
-
-
-        coroutineContext.launch {
-            val realm = Realm.getInstance(realmConfig)
-
-        }
     }
 }
