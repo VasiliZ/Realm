@@ -12,7 +12,8 @@
         android:theme="@style/Theme.Realm">
         <activity
             android:name=".MainActivity"
-            android:exported="false">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,7 +21,15 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AddBookActivity" />
+        <activity
+            android:name=".AddBookActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AuthorActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AuthorsActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

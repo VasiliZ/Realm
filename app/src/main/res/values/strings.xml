@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Realm</string>
     <string name="add_book">Add book</string>
+    <string name="image_description">book image</string>
+    <string name="add_author">Add author</string>
+    <string name="author_activity_author_name">Author</string>
 </resources>

@@ -2,77 +2,115 @@ package com.github.rtyvz.realm
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
+import com.github.rtyvz.realm.RealmApp.Companion.realmCoroutineDispatcher
 import com.github.rtyvz.realm.model.BookDto
 import com.github.rtyvz.realm.model.BookPresentation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.realm.Realm
-import io.realm.RealmConfiguration
 import io.realm.kotlin.executeTransactionAwait
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var addBookButton: FloatingActionButton
-    private val coroutineContext = CoroutineScope(Dispatchers.IO + Job())
-    private val realmConfig = RealmConfiguration.Builder().schemaVersion(realmVersion).build()
+    private val coroutineContext = CoroutineScope(realmCoroutineDispatcher + Job())
     private lateinit var bookList: RecyclerView
     private lateinit var bookAdapter: BookAdapter
+    private lateinit var toolBar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        toolBar = findViewById(R.id.toolBar)
         addBookButton = findViewById(R.id.addBookAction)
         bookList = findViewById(R.id.bookList)
 
-        bookAdapter = BookAdapter {
+        setSupportActionBar(toolBar)
+
+        bookAdapter = BookAdapter({
             startActivity(Intent(this, AddBookActivity::class.java).apply {
                 putExtra(EDIT_BOOK_EXTRA, it)
             })
+        }, {
+            startActivity(Intent(this, AuthorsActivity::class.java).apply {
+                putExtra(BOOK_ID_EXTRA, it)
+            })
+        }) {
+            deleteBook(it)
+
+            coroutineContext.launch(Dispatchers.Main) {
+                bookAdapter.submitList(retrieveBooks())
+            }
         }
 
         bookList.adapter = bookAdapter
 
-        coroutineContext.launch {
-            retrieveBooks()
-        }
-
         addBookButton.setOnClickListener {
             startActivity(Intent(this, AddBookActivity::class.java))
         }
+
+        toolBar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.authorItem -> {
+                    startActivity(Intent(this, AuthorActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_toolbar_menu, menu)
+        return true
     }
 
     override fun onResume() {
         super.onResume()
 
-        coroutineContext.launch {
-            bookAdapter.submitList(retrieveBooks().map {
-                BookPresentation(it.id, it.title, it.description)
-            })
+        coroutineContext.launch(Dispatchers.Main) {
+            bookAdapter.submitList(retrieveBooks())
         }
     }
 
+    private suspend fun retrieveBooks(): List<BookPresentation> {
+        val books = mutableListOf<BookPresentation>()
 
-    private suspend fun retrieveBooks(): List<BookDto> {
-        val realm = Realm.getInstance(realmConfig)
-        val books = mutableListOf<BookDto>()
-        realm.executeTransactionAwait(Dispatchers.IO) { transaction ->
-            books.addAll(
-                realm.where(BookDto::class.java)
-                    .findAll()
-                    .map {
-                        BookDto().apply {
-                            title = it.title
-                            description = it.description
+        return coroutineContext.async {
+            val realm = Realm.getInstance(RealmApp.realmConfig)
+
+            realm.executeTransactionAwait(Dispatchers.IO) { transaction ->
+                books.addAll(
+                    transaction
+                        .where(BookDto::class.java)
+                        .findAll()
+                        .map {
+                            BookPresentation(
+                                id = it.id,
+                                title = it.title,
+                                description = it.description,
+                                authorName = it.author?.firstOrNull()?.author
+                            )
                         }
-                    }
-            )
+                )
+            }
+            books
+        }.await()
+    }
+
+    private fun deleteBook(bookId: String) {
+        coroutineContext.launch {
+            Realm.getInstance(RealmApp.realmConfig).executeTransactionAwait {
+                it.where(BookDto::class.java)
+                    .equalTo("id", bookId)
+                    .findFirst()
+                    ?.deleteFromRealm()
+            }
         }
-        return books
     }
 }

@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="medium_margin">16dp</dimen>
+
+    <dimen name="middle_text_size">20sp</dimen>
+
+    <dimen name="image_height">400dp</dimen>
+    <dimen name="image_width">300dp</dimen>
+
+    <dimen name="icon_size">100dp</dimen>
 </resources>
