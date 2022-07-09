@@ -1,9 +1,10 @@
-package com.github.rtyvz.realm
+package com.github.rtyvz.realm.ui
 
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import com.github.rtyvz.realm.R
 import com.github.rtyvz.realm.RealmApp.Companion.realmConfig
 import com.github.rtyvz.realm.RealmApp.Companion.realmCoroutineDispatcher
 import com.github.rtyvz.realm.model.BookDto

@@ -1,4 +1,4 @@
-package com.github.rtyvz.realm
+package com.github.rtyvz.realm.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.github.rtyvz.realm.R
 import com.github.rtyvz.realm.model.BookPresentation
 
 class BookAdapter(

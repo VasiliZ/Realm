@@ -1,10 +1,12 @@
-package com.github.rtyvz.realm
+package com.github.rtyvz.realm.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.github.rtyvz.realm.R
 import com.github.rtyvz.realm.RealmApp.Companion.realmConfig
 import com.github.rtyvz.realm.RealmApp.Companion.realmCoroutineDispatcher
+import com.github.rtyvz.realm.adapter.AuthorListAdapter
 import com.github.rtyvz.realm.model.AuthorDto
 import com.github.rtyvz.realm.model.AuthorPresentation
 import com.github.rtyvz.realm.model.BookDto
@@ -15,6 +17,7 @@ import kotlinx.coroutines.*
 const val BOOK_ID_EXTRA = "BOOK_ID"
 private const val BOOK_ID_FIELD_NAME = "id"
 private const val AUTHOR_ID_FIELD_NAME = "id"
+private const val EMPTY_STRING = ""
 
 class AuthorsActivity : AppCompatActivity() {
 
@@ -26,7 +29,7 @@ class AuthorsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.author_list_activity)
 
-        val bookId = intent.getStringExtra(BOOK_ID_EXTRA) ?: ""
+        val bookId = intent.getStringExtra(BOOK_ID_EXTRA) ?: EMPTY_STRING
 
         authorAdapter = AuthorListAdapter {
             addAuthorBook(it.id, bookId)
@@ -43,14 +46,14 @@ class AuthorsActivity : AppCompatActivity() {
 
     private suspend fun retrieveAuthors(): List<AuthorPresentation> {
 
-        return coroutineContext.async {
+        return withContext(coroutineContext.coroutineContext) {
             val authors = mutableListOf<AuthorPresentation>()
-            val realm = Realm.getInstance(realmConfig)
-
-            realm.executeTransactionAwait { transaction ->
+            Realm.getInstance(realmConfig).executeTransactionAwait { transaction ->
                 authors.addAll(
-                    transaction.where(AuthorDto::class.java)
-                        .findAll().map {
+                    transaction
+                        .where(AuthorDto::class.java)
+                        .findAll()
+                        .map {
                             AuthorPresentation(
                                 id = it.id,
                                 name = it.author
@@ -58,7 +61,7 @@ class AuthorsActivity : AppCompatActivity() {
                         })
             }
             authors
-        }.await()
+        }
     }
 
     private fun addAuthorBook(authorId: String, bookId: String) {
